@@ -1,7 +1,16 @@
 <?php
 
 use App\Class\Controller;
+use App\DevTools\EchoDebug;
 use App\Router\Router;
+use App\Core\EntityManager\EntityManager;
+
+
+$post = new EntityManager('post');
+$post->find(['user_id' => 1, '*', 'populate'=> ['category',['*']]]);
+
+EchoDebug::xDebug($post);
+
 
 ?>
 <!DOCTYPE html>

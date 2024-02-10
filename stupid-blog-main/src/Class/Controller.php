@@ -14,7 +14,6 @@ class Controller
         require_once 'src/views/' . $view . '.php';
         $content = ob_get_clean();
         require_once 'src/views/partials/header.php';
-        echo $content;
         require_once 'src/views/partials/footer.php';
     }
 
@@ -258,7 +257,6 @@ class Controller
                 continue;
             }
             $setter = 'set' . $key;
-            var_dump([$key, $value]);
             if (method_exists($instance, $setter) && null !== $instance->$getter()) {
                 $instance->$setter($value);
             }

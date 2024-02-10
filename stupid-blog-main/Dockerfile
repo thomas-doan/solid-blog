@@ -15,8 +15,15 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Copiez le code de votre application PHP dans le conteneur
  COPY . .
  
+# Définissez les variables d'environnement à partir du contenu du fichier .env
+ENV HOST_DB="mariadb" \
+    DATABASE_DB="solid-blog" \
+    USER_DB="johan" \
+    PASSWORD_DB="root"
+
 # Exposez le port qu'Apache écoute sur
 EXPOSE 80 
 
+
 # Démarrez Apache lorsque le conteneur exécute
- CMD [ "apache2-foreground" ]
+CMD ["apache2-foreground"]
