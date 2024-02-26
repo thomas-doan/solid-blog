@@ -246,4 +246,23 @@ class QueryBuilder  {
 
         return $this->sendQuery();
     }
+
+    /**
+     * Verfie si un field est bien unique
+     * @param string $table
+     * @param string $field
+     * @param string $value
+     * @return bool
+     */
+    public function isUnique($table, $field, $value)
+    {
+        $this->query = 'SELECT NOT EXISTS (
+            SELECT 1
+            FROM ' . $table . '
+            WHERE ' . $field . ' = :value
+        ) AS is_unique_value';
+        $this->close[':value'] = $value;
+        $response = $this->sendQuery(true);
+        return $response['is_unique_value'] === 1;
+    }
 }

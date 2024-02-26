@@ -110,7 +110,7 @@ class EntityManager extends QueryBuilder
                 }
             }
             if($hasKeyString === false){
-                throw new \Exception("Une valeur de référence doit être éférencée afin de retourner un résultat unique");
+                throw new \Exception("Une valeur de référence doit être référencée afin de retourner un résultat unique");
             }
             if($hasFullAttributes === true){
                 $attributes = ['*'];
@@ -325,6 +325,18 @@ class EntityManager extends QueryBuilder
         }
 
     }
+
+    /**
+     * Verifie si le filed est unique
+     * @param $value string
+     * @param $field string
+     * @return bool
+     */
+    public function isUniqueField(string $field, string $value): bool
+    {
+        return $this->isUnique($this->primaryTable, $field, $value);
+    }
+
 
 }
 
