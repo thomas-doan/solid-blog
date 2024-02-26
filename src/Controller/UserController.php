@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Container\SimpleContainer;
 use App\DTO\UserDTO;
 use App\Exception\ValidationException;
+use App\Factory\UserDTOFactory;
 use App\Mapper\UserMapper;
+use App\Model\User;
 use App\Service\User\UserServiceInterface;
 use Exception;
 
@@ -68,23 +70,20 @@ class UserController extends AbstractController
 
     public function profile(): void
     {
-        $user = new User();
-        if (self::getUser() === null) {
-            $this->redirect('login');
 
-            return;
+        if (!$_SESSION['user']) {
+            $this->redirect('login');
         }
-        $user = $user->findOneById($_SESSION['user']->getId());
-        if ($user) {
+    $user = $_SESSION['user'];
             $user->setPassword('');
             $this->render('profile', ['user' => $user]);
 
-            return;
-        }
 
-        $this->redirect('login');
 
-        return;
+
+
+
+
     }
 
 }

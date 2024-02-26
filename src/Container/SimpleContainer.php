@@ -2,15 +2,11 @@
 
 namespace App\Container;
 
-
-
-use App\Container\ContainerInterface;
-use App\Container\NotFoundExceptionInterface;
-use App\Container\ContainerExceptionInterface;
+use App\DTO\UserDTO;
 use App\Factory\UserDTOFactory;
 use App\Mapper\UserMapper;
+use App\Model\User;
 use App\Service\User\UserService;
-use App\Service\User\UserServiceInterface;
 
 class SimpleContainer implements ContainerInterface
 {
@@ -23,13 +19,26 @@ class SimpleContainer implements ContainerInterface
             UserDTOFactory::class => function() {
                 return new UserDTOFactory();
             },
-            UserMapper::class => function() {
-                return new UserMapper();
+
+            User::class => function() {
+                return new User();
+            },
+
+            UserDTO::class => function() {
+                return new UserDTO();
+            },
+
+            UserMapper::class => function($container) {
+                return new UserMapper(
+                    $container->get(User::class),
+                    $container->get(UserDTO::class)
+                );
             },
             UserService::class => function($container) {
                 return new UserService(
                     $container->get(UserMapper::class),
-                    $container->get(UserDTOFactory::class)
+                    $container->get(UserDTOFactory::class),
+                    $container
                 );
             },
 

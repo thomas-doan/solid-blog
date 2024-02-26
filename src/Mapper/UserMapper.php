@@ -7,6 +7,15 @@ use App\Model\User;
 
 class UserMapper
 {
+    private User $user;
+    private UserDTO $userDTO;
+
+    public function __construct(User $user, UserDTO $userDTO)
+    {
+        $this->user = $user;
+        $this->userDTO = $userDTO;
+    }
+
     public function saveUser(UserDTO $userDTO): void
     {
         $user = $this->mapDTOToUser($userDTO);
@@ -16,29 +25,27 @@ class UserMapper
 
     public function emailExists(string $email): ?User
     {
-        $user = new User();
-        return $user->findOneByEmail($email);
+        return $this->user->findOneByEmail($email);
     }
 
     public function mapDTOToUser(UserDTO $userDTO): User
     {
-        $user = new User();
-        $user->setEmail($userDTO->getEmail());
-        $user->setPassword(password_hash($userDTO->getPassword(), PASSWORD_DEFAULT));
+        $this->user->setEmail($userDTO->getEmail());
+        $this->user->setPassword(password_hash($userDTO->getPassword(), PASSWORD_DEFAULT));
         if ($userDTO->getFirstname() !== null) {
-            $user->setFirstname($userDTO->getFirstname());
+            $this->user->setFirstname($userDTO->getFirstname());
         }
         if ($userDTO->getLastname() !== null) {
-            $user->setLastname($userDTO->getLastname());
+            $this->user->setLastname($userDTO->getLastname());
         }
-        return $user;
+        return $this->user;
     }
 
     public function mapUserToDTO(UserDTO $userDTO): UserDTO
     {
-        $user = new User();
-        $user = $user->findOneByEmail($userDTO->getEmail());
+        $user = $this->user->findOneByEmail($userDTO->getEmail());
 
+        $userDTO->setId($user->getId());
         $userDTO->setEmail($user->getEmail());
         $userDTO->setFirstname($user->getFirstname());
         $userDTO->setLastname($user->getLastname());

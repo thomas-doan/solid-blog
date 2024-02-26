@@ -3,7 +3,7 @@
 use App\Controller\UserController;
 use App\Router\Router;
 
-var_dump(UserController::getUser());
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

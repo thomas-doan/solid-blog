@@ -2,6 +2,7 @@
 
 namespace App\Service\User;
 
+use App\Container\SimpleContainer;
 use App\Exception\ValidationException;
 use App\Factory\UserDTOFactory;
 use App\Service\User\UserServiceInterface;
@@ -14,10 +15,13 @@ class UserService implements UserServiceInterface
     private UserMapper $userMapper;
     private UserDTOFactory $userDtoFactory;
 
-    public function __construct(UserMapper $userMapper, UserDTOFactory $userDtoFactory)
+    private SimpleContainer $container;
+
+    public function __construct(UserMapper $userMapper, UserDTOFactory $userDtoFactory, SimpleContainer $container)
     {
         $this->userMapper = $userMapper;
         $this->userDtoFactory = $userDtoFactory;
+        $this->container = $container;
     }
 
     /**
@@ -54,7 +58,6 @@ class UserService implements UserServiceInterface
         throw new ValidationException("email inexistant");
 
     }
-
     /**
      * @throws ValidationException
      * @throws Exception

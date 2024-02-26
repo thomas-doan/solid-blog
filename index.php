@@ -4,12 +4,12 @@ use App\Container\SimpleContainer;
 use App\Controller\AdminController;
 use App\Controller\HomeController;
 use App\Controller\UserController;
-use App\Exception\ValidationException;
+use App\DTO\UserDTO;
 use App\Factory\UserDTOFactory;
 use App\Mapper\UserMapper;
+use App\Model\User;
 use App\Router\Router;
 use App\Service\User\UserService;
-use App\Service\User\UserServiceInterface;
 
 require_once 'vendor/autoload.php';
 
@@ -23,13 +23,17 @@ $router->setBasePath('/blog/');
 
 $container = new SimpleContainer();
 
-$container->set(UserMapper::class, function() {
-    return new UserMapper();
+$container->set(UserMapper::class, function($container) {
+    return new UserMapper(
+        $container->get(User::class),
+        $container->get(UserDTO::class)
+    );
 });
 
 $container->set(UserService::class, function($container) {
     return new UserService($container->get(UserMapper::class),
-                            $container->get(UserDTOFactory::class));
+                            $container->get(UserDTOFactory::class),
+                            $container);
 });
 
 $router->get('/', function () {
