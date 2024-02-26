@@ -8,6 +8,8 @@ use App\Core\EntityManager\EntityAttribute;
 use App\Core\EntityManager\EntityAttributeInterface;
 use App\Core\EntityManager\EntityValidator as EntityValidator;
 
+// Open-Closed Principle
+// Liskov Substitution Principle - 3ème partie
 class EntityManager extends QueryBuilder 
 {
     public string $primaryKey = 'id';

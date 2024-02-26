@@ -9,6 +9,9 @@ use App\Mapper\UserMapper;
 use App\Service\User\UserServiceInterface;
 use Exception;
 
+// Principe de ségrégation des interfaces
+// Dependency Inversion Principle
+
 class UserController extends AbstractController
 {
     private UserServiceInterface $userService;

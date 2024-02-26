@@ -2,6 +2,7 @@
 
 namespace App\Core\EntityManager;
 
+// Principe de ségrégation des interfaces
 
 class EntityAttribute implements EntityAttributeInterface{
 

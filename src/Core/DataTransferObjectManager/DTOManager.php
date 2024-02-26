@@ -10,6 +10,7 @@ use App\DevTools\EchoDebug;
 
 use function PHPSTORM_META\map;
 
+// Dependency Inversion Principle
 /**
  * Class DTOManager : permet de gérer les objets de transfert de données
  * Comment fonctionne cette classe ?

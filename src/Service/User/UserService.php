@@ -9,6 +9,8 @@ use App\DTO\UserDTO;
 use App\Mapper\UserMapper;
 use Exception;
 
+// Interface Segregation Principle
+
 class UserService implements UserServiceInterface
 {
     private UserMapper $userMapper;

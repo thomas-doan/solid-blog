@@ -6,6 +6,9 @@
 namespace App\Core\Database;
 
 
+// Single Responsibility Principle
+// Liskov Substitution Principle - 1ère partie
+
 class Database implements DatabaseInterface
 {
     private $db;

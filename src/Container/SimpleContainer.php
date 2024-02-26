@@ -12,6 +12,7 @@ use App\Mapper\UserMapper;
 use App\Service\User\UserService;
 use App\Service\User\UserServiceInterface;
 
+// Single Responsibility Principle
 class SimpleContainer implements ContainerInterface
 {
     private array $entries = [];

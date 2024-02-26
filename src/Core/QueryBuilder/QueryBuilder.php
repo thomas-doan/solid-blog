@@ -4,6 +4,9 @@ namespace App\Core\QueryBuilder;
 
 use App\Core\Database\Database;
 
+//Open-Closed Principle
+// Liskov Substitution Principle - 2ème partie
+
 /**
  * Cette classe permet de faire des requêtes SQL à la base de données
  * elle instancie la classe Database pour gérer la connexion à la base de données et la méthode query pour faire des requêtes SQL sécurisé

@@ -21,7 +21,7 @@ $router = new Router($_SERVER['REQUEST_URI']);
 
 $router->setBasePath('/blog/');
 
-$container = new SimpleContainer();
+$container = new SimpleContainer(); // Container d'injection de dépendance
 
 $container->set(UserMapper::class, function() {
     return new UserMapper();
