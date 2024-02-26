@@ -2,6 +2,7 @@
 
 namespace App\Class;
 
+use App\Model\User;
 use DateTime;
 
 class Comment

@@ -31,6 +31,8 @@ class Router
 
     private function add($path, $callable, $name, $method)
     {
+
+
         $path = '/' . $this->basePath . '/' . trim($path, '/');
         $route = new Route($path, $callable);
         $this->routes[$method][] = $route;
@@ -42,6 +44,8 @@ class Router
         if ($name) {
             self::$namedRoutes[$name] = $route;
         }
+
+
         return $route;
     }
 

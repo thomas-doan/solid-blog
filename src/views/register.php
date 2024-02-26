@@ -1,13 +1,14 @@
 <?php
 
 use App\Router\Router;
-
 ?>
+
+
 
 <body>
     <h1>Register</h1>
     <?php if (isset($error)) : ?>
-        <p><?= $error ?></p>
+        <div class="error"><?= $error ?></div>
     <?php endif ?>
     <form action="<?= Router::url('register') ?>" method="post">
         <div>

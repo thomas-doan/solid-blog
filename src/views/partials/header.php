@@ -1,17 +1,9 @@
 <?php
 
-use App\Class\Controller;
-use App\DevTools\EchoDebug;
+use App\Controller\UserController;
 use App\Router\Router;
-use App\Core\EntityManager\EntityManager;
 
-
-$post = new EntityManager('post');
-$post->find(['user_id' => 1, '*', 'populate'=> ['category',['*']]]);
-
-EchoDebug::xDebug($post);
-
-
+var_dump(UserController::getUser());
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,17 +16,17 @@ EchoDebug::xDebug($post);
 
 <header>
     <h1>Stupid Blog</h1>
-    <?php if (Controller::getUser()) : ?>
-        <p>Bonjour <?= Controller::getUser()->getFirstname() ?> <?= Controller::getUser()->getLastname() ?></p>
+    <?php if (UserController::getUser()) : ?>
+        <p>Bonjour <?= UserController::getUser()->getFirstname() ?> <?= UserController::getUser()->getLastname() ?></p>
     <?php endif ?>
     <nav>
         <ul>
             <li><a href="<?= Router::url('home') ?>">Accueil</a></li>
             <li><a href="<?= Router::url('posts', ['page' => 1]) ?>">Articles</a></li>
-            <?php if (null !== Controller::getUser()) : ?>
+            <?php if (null !== UserController::getUser()) : ?>
                 <li><a href="<?= Router::url('profile') ?>">Profil</a></li>
                 <li><a href="<?= Router::url('logout') ?>">Se déconnecter</a></li>
-                <?php if (Controller::getUser()->hasRole('ROLE_ADMIN')) : ?>
+                <?php if (UserController::getUser()->hasRole('ROLE_ADMIN')) : ?>
                     <li><a href="<?= Router::url('admin', ['action' => 'list', 'entity' => 'user']) ?>">Admin</a></li>
                 <?php endif ?>
             <?php else : ?>
