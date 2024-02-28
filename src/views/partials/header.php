@@ -2,6 +2,32 @@
 
 use App\Controller\UserController;
 use App\Router\Router;
+use App\DevTools\EchoDebug;
+
+class TestUser {
+
+    use \App\Core\Accessors\AccessorGenerator;
+    //use \App\Core\Accessors\AccessorValidator;
+
+    public $firstName = "John";
+    public $age = 25;
+    public $city = "New York";
+    
+    public function __construct()
+    {
+        $this->generateAccessor();
+    }
+
+
+
+}
+
+$user = new TestUser();
+EchoDebug::xDebug($user->getFirstName());
+$user->setFirstName("johan");
+EchoDebug::xDebug($user->getFirstName());
+
+
 
 var_dump(UserController::getUser());
 ?>
