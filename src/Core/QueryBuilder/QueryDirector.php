@@ -52,7 +52,6 @@ class QueryDirector  {
      */
     public function sendQuery($isOne = false)
      {
-        EchoDebug::xDebug($this->query, $this->close, $isOne);
         $req = $this->db->query($this->query, $this->close, $isOne);
         $this->query = '';
         $this->close = [];
