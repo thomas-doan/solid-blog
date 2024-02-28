@@ -3,6 +3,7 @@
 
 namespace App\Core\EntityManager;
 
+use App\Core\Accessors\AccessorGenerator;
 use App\Core\QueryBuilder\QueryBuilder;
 use App\Core\EntityManager\EntityAttribute;
 use App\Core\EntityManager\EntityAttributeInterface;
@@ -12,6 +13,7 @@ use App\Core\EntityManager\EntityValidator as EntityValidator;
 // Liskov Substitution Principle - 3ème partie
 class EntityManager extends QueryBuilder 
 {
+    use AccessorGenerator;
     public string $primaryKey = 'id';
     public string $primaryTable ;
     /** @var EntityAttributeInterface[] */
@@ -23,6 +25,7 @@ class EntityManager extends QueryBuilder
 
     public function __construct(string $primaryTable)
     {
+        $this->generateAccessor();
         $this->primaryTable = $primaryTable;
         parent::__construct();
         foreach ($this->getInfoTable($primaryTable) as $field) {
@@ -32,35 +35,35 @@ class EntityManager extends QueryBuilder
 
     }
 
-    public function getFields(): array
-    {
-        return $this->fields;
-    }
+    // public function getFields(): array
+    // {
+    //     return $this->fields;
+    // }
 
-    public function setFields(array $fields): void
-    {
-        $this->fields = $fields;
-    }
+    // public function setFields(array $fields): void
+    // {
+    //     $this->fields = $fields;
+    // }
 
-    public function getRelations(): array
-    {
-        return $this->relations;
-    }
+    // public function getRelations(): array
+    // {
+    //     return $this->relations;
+    // }
 
-    public function setRelations(array $relations): void
-    {
-        $this->relations = $relations;
-    }
+    // public function setRelations(array $relations): void
+    // {
+    //     $this->relations = $relations;
+    // }
 
-    public function getResult(): array
-    {
-        return $this->result;
-    }
+    // public function getResult(): array
+    // {
+    //     return $this->result;
+    // }
 
-    public function setResult(array $result): void
-    {
-        $this->result = $result;
-    }
+    // public function setResult(array $result): void
+    // {
+    //     $this->result = $result;
+    // }
 
     public function getHistoryQuery(): array
     {
@@ -133,6 +136,8 @@ class EntityManager extends QueryBuilder
         $this->saveQuery('findOne', $this->getQuery(), $this->getClose());
         $this->result = $this->sendQuery($isUniqueResponse);
     }
+
+
 
     /**
      * Permet de retourner plusieurs résultats
