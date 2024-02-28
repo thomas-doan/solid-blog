@@ -4,6 +4,7 @@
 namespace App\Core\EntityManager;
 
 use App\Core\Accessors\AccessorGenerator;
+use App\Core\Database\DatabaseManager;
 use App\Core\QueryBuilder\QueryDirector;
 use App\Core\EntityManager\EntityAttribute;
 use App\Core\EntityManager\EntityAttributeInterface;
@@ -28,10 +29,12 @@ class EntityManager extends QueryDirector
         $this->generateAccessor();
         $this->primaryTable = $primaryTable;
         parent::__construct();
-        foreach ($this->getInfoTable($primaryTable) as $field) {
+
+        foreach (DatabaseManager::getInfoTable($primaryTable) as $field) {
             $this->fields[] = new EntityAttribute($field);
         }
-        $this->relations = $this->getRelationsTable($primaryTable);
+        
+        $this->relations = DatabaseManager::getRelationsTable($primaryTable);
 
     }
 
