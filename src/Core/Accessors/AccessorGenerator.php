@@ -51,7 +51,7 @@ trait AccessorGenerator
             if ($isSetter) {
                 // on s'assure que le type de l'attribut soit respecté
                 if (gettype($arguments[0]) !== gettype($this->$propertyName)) {
-                    throw new BadMethodCallException ("Le type de l'attribut $propertyName n'est pas respecté");
+                    throw new BadMethodCallException ("Le type de l'attribut $propertyName n'est pas respecté. Type attendu : " . gettype($this->$propertyName) . " Type reçu : " . gettype($arguments[0]) );
                 }
                 $this->$propertyName = $arguments[0];
                 error_reporting(E_ALL);
