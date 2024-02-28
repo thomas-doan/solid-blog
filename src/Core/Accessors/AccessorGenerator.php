@@ -8,7 +8,26 @@ use ReflectionProperty;
 
 /**
  * Génère les accesseurs magiques pour les propriétés publiques
+ * S'apparente a une méthode virtuelle en C++ ou Java
+ * @method __call (string $methodName, array $arguments) : mixed
+ *  - valide l'existance des méthodes get et set pour chaque attribut de la classe
+ * @method generateAccessor() : void 
+ *  - genère les accesseurs pour chaque attribut de la classe
+ * @method generateGetter(string $propertyName, string $capitalizedPropertyName) : void 
+ *  - genère les getters pour chaque attribut de la classe
+ * @method generateSetter(string $propertyName, string $capitalizedPropertyName) : void
+ *  - genère les setters pour chaque attribut de la classe
  * 
+ * @info : Cet traite doit être appellé dans la classe qui l'implémente
+ *  - use AccessorGenerator;
+ *  - Dans le constructeur de la classe qui l'implémente : $this->generateAccessor();
+ * ------------------------------------------
+ * Les méthodes get[nom de l'attribut] et set[nom de l'attribut] sont générées automatiquement
+ * et peuvent être utilisées pour accéder aux attributs de la classe
+ * ------------------------------------------
+ * @info 
+ *  - Réponds au principe de responsabilité unique
+ *  - Réponds au design pattern Template method 
  */
 trait AccessorGenerator
 {
