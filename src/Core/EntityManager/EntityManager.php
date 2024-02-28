@@ -4,14 +4,14 @@
 namespace App\Core\EntityManager;
 
 use App\Core\Accessors\AccessorGenerator;
-use App\Core\QueryBuilder\QueryBuilder;
+use App\Core\QueryBuilder\QueryDirector;
 use App\Core\EntityManager\EntityAttribute;
 use App\Core\EntityManager\EntityAttributeInterface;
 use App\Core\EntityManager\EntityValidator as EntityValidator;
 
 // Open-Closed Principle
 // Liskov Substitution Principle - 3ème partie
-class EntityManager extends QueryBuilder 
+class EntityManager extends QueryDirector 
 {
     use AccessorGenerator;
     public string $primaryKey = 'id';
