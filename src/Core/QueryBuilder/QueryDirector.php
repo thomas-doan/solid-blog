@@ -6,23 +6,11 @@ use App\Core\Accessors\AccessorGenerator;
 use App\Core\Database\Database;
 use App\DevTools\EchoDebug;
 
-interface QueryDirectorInterface
-{
-    public function select ($params = null);
-    public function update (string $table, array $params);
-    public function delete (string $table);
-    public function insert (string $table, array $params);
-    public function from (string $table);
-    public function where (array $condition);
-    public function join (string $Entity, array $foreignKeys);
-    public function sendQuery($isOne = false);
-}
-
 /**
  * Cette classe permet de faire des requêtes SQL à la base de données
  * elle instancie la classe Database pour gérer la connexion à la base de données et la méthode query pour faire des requêtes SQL sécurisé
  */
-class QueryDirector  {
+class QueryDirector implements QueryDirectorInterface{
     use AccessorGenerator;
     /** Connection à la base de données */
     private $db;
@@ -38,32 +26,20 @@ class QueryDirector  {
     private $table = '';
 
 
-
     public function __construct()
     {
         $this->generateAccessor();
         $this->db = new Database();
     }
 
-
-    /**
-     * Permet d'envoyer la requête sql à la base de données une fois préparée
-     * @param bool $isOne
-     */
-    public function sendQuery($isOne = false)
+    public function sendQuery($isOnly = false)
      {
-        $req = $this->db->query($this->query, $this->close, $isOne);
+        $req = $this->db->query($this->query, $this->close, $isOnly);
         $this->query = '';
         $this->close = [];
         return $req;
      }
 
-     /**
-      * Permet de selectionner des éléments dans la base de données
-        * @param array | null  $params
-        * exemple : ['id', 'name']
-        * @return $this
-      */
     public function select ($params = null )
     {
         if (empty($params)) {
@@ -76,12 +52,7 @@ class QueryDirector  {
         return $this;
     }
 
-    /**
-     * Permet de update une element dans la base de données
-     * @param string $table table à modifier
-     * @param array $params attributs à modifier
-     * exemple : ['id' => 1, 'name' => 'toto']
-     */
+    
     public function update (string $table, array $params)
     {
         $this->table = $table;
@@ -95,24 +66,14 @@ class QueryDirector  {
         return $this;
     }
 
-    /**
-     * Permet de supprimer un élément dans la base de données
-     * @param string $table
-     * @return $this
-     */
+    
     public function delete (string $table)
     {
         $this->query = 'DELETE FROM ' . $table;
         return $this;
     }
 
-    /**
-     * Permet d'insérer un élément dans la base de données
-     * @param string $table
-     * @param array $params
-     * exemple : ['id' => 1, 'name' => 'toto']
-     * @return $this
-     */
+    
     public function insert (string $table, array $params)
     {
         $this->table = $table;
@@ -140,12 +101,7 @@ class QueryDirector  {
         return $this;
     }
 
-    /**
-     * Permet d'interger une closure dans la requête SQL
-     * @param array $condition
-     * exemple : ['id' => 1, 'name' => 'toto']
-     * @return $this
-     */
+    
     public function where (array $condition)
     {
         $completedQuery = [];
@@ -167,12 +123,6 @@ class QueryDirector  {
         return $this;
     }
 
-    /**
-     * Permet de faire une jointure avec une autre table
-     * @param string $table
-     * @param array $foreignKeys
-     * @return $this
-     */
     public function join (string $Entity, array $foreignKeys)
     {
         //on fake un join en faisaint un select sur la table en question
