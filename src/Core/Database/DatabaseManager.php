@@ -9,15 +9,7 @@ use App\DevTools\EchoDebug;
  * Cette classe permet de récupérer des informations sur la structure de la base de données
  * 
  */
-class DatabaseManager extends QueryDirector{
-
-    private DatabaseInterface $db;
-
-    public function __construct()
-    {
-       //on intancie le constucteur parent
-         parent::__construct();
-    }
+class DatabaseManager{
 
     /**
      * Permet de récupérer les informations liées à une table
@@ -32,22 +24,22 @@ class DatabaseManager extends QueryDirector{
      * @EXTRA => string (Extra information, ex : auto_increment),
      * ]
      */
-    public function getInfoTable($table)
+    public static function getInfoTable($table)
     {
+        $query = new QueryDirector();
+
         $attributes = [
             "TABLE_SCHEMA" => $_ENV['DATABASE_DB'],
             "TABLE_NAME" => $table
         ];
 
-        $this->setQuery('SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_DEFAULT, IS_NULLABLE,
+        $query->setQuery('SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_DEFAULT, IS_NULLABLE,
         COLUMN_KEY, EXTRA
         FROM INFORMATION_SCHEMA.COLUMNS');
 
-        EchoDebug::xDebug($this->getQuery());
+        $query->where($attributes);
 
-        $this->where($attributes);
-
-        return $this->sendQuery();
+        return $query->sendQuery();
     }
 
     /**
@@ -59,14 +51,15 @@ class DatabaseManager extends QueryDirector{
      * @REFERENCED_TABLE_NAME => string (Nom de la table référencée),
      * @TABLE_NAME => string (Nom de la table)
      */
-    public function getRelationsTable($table)
+    public static function getRelationsTable($table)
     {
+        $query = new QueryDirector();
         $attributes = [
             "TABLE_NAME" => $table,
             "CONSTRAINT_SCHEMA" => $_ENV['DATABASE_DB']
         ];
 
-        $this->setQuery('SELECT 
+        $query->setQuery('SELECT 
         CONSTRAINT_NAME,
         UNIQUE_CONSTRAINT_NAME,
         REFERENCED_TABLE_NAME,
@@ -74,9 +67,9 @@ class DatabaseManager extends QueryDirector{
         FROM 
         INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS ');
 
-        $this->where($attributes);
+        $query->where($attributes);
 
-        return $this->sendQuery();
+        return $query->sendQuery();
     }
 
     /**
@@ -86,19 +79,20 @@ class DatabaseManager extends QueryDirector{
      * @param string $value
      * @return bool
      */
-    public function isUnique($table, $field, $value)
+    public static function isUnique($table, $field, $value)
     {
-        $this->setQuery('SELECT NOT EXISTS (
+        $query = new QueryDirector();
+        $query->setQuery('SELECT NOT EXISTS (
             SELECT 1
             FROM ' . $table . '
             WHERE ' . $field . ' = :value
         ) AS is_unique_value');
 
-        $closure = $this->getClose();
+        $closure = $query->getClose();
         $closure[':value'] = $value;
-        $this->setClose($closure);
+        $query->setClose($closure);
 
-        $response = $this->sendQuery(true);
+        $response = $query->sendQuery(true);
         return $response['is_unique_value'] === 1;
     }
 }
