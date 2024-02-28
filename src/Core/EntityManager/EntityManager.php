@@ -33,41 +33,13 @@ class EntityManager extends QueryDirector
         foreach (DatabaseManager::getInfoTable($primaryTable) as $field) {
             $this->fields[] = new EntityAttribute($field);
         }
-        
+
         $this->relations = DatabaseManager::getRelationsTable($primaryTable);
 
     }
 
-    // public function getFields(): array
-    // {
-    //     return $this->fields;
-    // }
 
-    // public function setFields(array $fields): void
-    // {
-    //     $this->fields = $fields;
-    // }
-
-    // public function getRelations(): array
-    // {
-    //     return $this->relations;
-    // }
-
-    // public function setRelations(array $relations): void
-    // {
-    //     $this->relations = $relations;
-    // }
-
-    // public function getResult(): array
-    // {
-    //     return $this->result;
-    // }
-
-    // public function setResult(array $result): void
-    // {
-    //     $this->result = $result;
-    // }
-
+    //insert to memmento patterne
     public function getHistoryQuery(): array
     {
         return $this->historyQuery;
