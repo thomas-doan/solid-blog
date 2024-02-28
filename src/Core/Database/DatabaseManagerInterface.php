@@ -5,7 +5,7 @@ namespace App\Core\Database;
 
 interface DatabaseManagerInterface
 {
-        /**
+    /**
      * Permet de récupérer les informations liées à une table
      * @param string $table
      * @return array informations de retour de la table 

@@ -1,13 +1,10 @@
 <?php
-/* Création de la classe Database qui implémente l'interface DatabaseInterface,
-* cette classe permettra de gérer la connexion à la base de données
-*/
+
 
 namespace App\Core\Database;
 
 
-// Single Responsibility Principle
-// Liskov Substitution Principle - 1ère partie
+
 
 class Database implements DatabaseInterface
 {
@@ -22,13 +19,7 @@ class Database implements DatabaseInterface
 
     }
 
-    /**
-     * Permet de faire une requête SQL
-     * @param $statement string Requête SQL
-     * @param $attributes array Tableau des attributs
-     * @param $one bool Retourne un seul résultat
-     */
-    public function query($statement, $attributes = [], $one = false){
+    public function query($statement, $attributes = [], $isOnly = false){
 
         if($attributes){
             $req = $this->db->prepare($statement);
@@ -38,7 +29,7 @@ class Database implements DatabaseInterface
             $req = $this->db->query($statement);
         }
         $req->setFetchMode(\PDO::FETCH_ASSOC);
-        if($one){
+        if($isOnly){
             $data = $req->fetch();
         } else {
             $data = $req->fetchAll();
