@@ -38,12 +38,15 @@ class EchoDebug
     }
     public static function xDebug($data)
     {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+        $file = $trace['file'];
+        $line = $trace['line'];
         //on structure le retour dans un div pour une meilleur lisibilité avec un 100vw
         echo "<div style='width:98vw; background-color: #00000015; padding: 12px; box-shadow: 0 0 10px #00000033; border-radius: 10px; border: 1px solid #dddddd33;'>";
         echo "<pre>";
         // on titre le retour avec le numéro de la ligne et du fichier lue actuellement
         echo "<div style='padding: 8px; width: 100%; margin: 0;* border-bottom: 1px solid #000000;'>";
-        echo "<h5 style='color: #000000; font-size: 1.2em; margin: 4px; padding: 0;'>Debug : " . __FILE__ . " : " . __LINE__ . "</h5>";
+        echo "<h5 style='color: #000000; font-size: 1.2em; margin: 4px; padding: 0;'>Debug : " . $file. " : " . $line . "</h5>";
         echo "</div>";
         // on affiche le contenu de la variable
         if(is_array($data)){
