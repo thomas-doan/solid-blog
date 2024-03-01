@@ -61,7 +61,7 @@ trait AccessorGenerator
         error_reporting(E_ALL);
 
         // Méthode non trouvée
-        throw new BadMethodCallException("Méthode $methodName non existante");
+        //throw new BadMethodCallException("Méthode $methodName non existante");
     }
 
     public function generateAccessor()
