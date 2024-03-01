@@ -1,32 +1,44 @@
 <?php
 
+use App\Class\Database;
 use App\Controller\UserController;
+use App\Core\Database\DatabaseManager;
+use App\Core\DataTransferObjectManager\DTOInterface;
+use App\Core\DataTransferObjectManager\DTOManager;
+use App\Core\EntityManager\EntityManager;
 use App\Router\Router;
 use App\DevTools\EchoDebug;
+use App\DTO\UserDTO;
 
-class TestUser {
+class updatePostDTO implements DTOInterface
+{
+    /**
+     * @primaryKey
+     */
+    public int $id = 1;
 
-    use \App\Core\Accessors\AccessorGenerator;
-    //use \App\Core\Accessors\AccessorValidator;
+    public string $title = "Et et tenetur assumenda fugit et recusandae voluptate.";
 
-    public $firstName = "John";
-    public $age = 25;
-    public $city = "New York";
-    
-    public function __construct()
-    {
-        $this->generateAccessor();
-    }
+    public string $content = "Voluptas hic dolorem quae iure sit.";
 
+    public DateTime $created_at = "2021-01-01 00:00:00";
 
+    /**
+     * @updatedTime
+     */
+    public DateTime $updated_at;
 
+    /**
+     * @foreignKey : user 
+     */
+    public int $user_id = new UserDTO();
 }
 
-$user = new TestUser();
-EchoDebug::xDebug($user->getFirstName());
-$user->setFirstName("johan");
-EchoDebug::xDebug($user->getFirstName());
-
+$insertUser = new updatePostDTO();
+$entityManager = new EntityManager('post');
+$entityManager->update($insertUser);
+//$entityManager->find(["user_id" => 1,"*","populate" => ['post',["id", "content"]]]);
+Echodebug::xDebug($entityManager->getResult());
 
 
 var_dump(UserController::getUser());

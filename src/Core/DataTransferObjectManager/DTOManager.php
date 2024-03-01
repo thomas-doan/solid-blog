@@ -10,6 +10,7 @@ use App\DevTools\EchoDebug;
 
 use function PHPSTORM_META\map;
 
+
 // Dependency Inversion Principle
 /**
  * Class DTOManager : permet de gérer les objets de transfert de données
@@ -17,15 +18,14 @@ use function PHPSTORM_META\map;
  * 1. Elle verifie que l'object reçus dans el constructu est bien une instance de DTOInterface
  * 2. Elle parcours alors ces propriétés et les décorateurs associés
  * 3. Elle traduit se décorateur par la méthode associées
- * @package App\Core\DataTransferObjectManager
- * @version 1.0
  */
 class DTOManager
 {
-    /** @var array $pilote : tableau qui contiendra les propriétés et les méthodes associées */
+    /** @var DTOPilote[] */
     public $pilote= [];
     public $dataToTransfer = [];
-    private $entity;
+    public EntityManager $entity;
+    public DTODecorator $format;
 
     public function __construct(EntityManager $entity)
     {
@@ -35,10 +35,10 @@ class DTOManager
     public function __process(DTOInterface $entity) {
         $reflector = new \ReflectionClass($entity);
         $ThisReflector = new \ReflectionClass($this);
-
         $hownMethods = $ThisReflector->getMethods();
         $properties = $reflector->getProperties();
         $matches = [];
+
 
         foreach ($hownMethods as $method) {
             //on ne récupère par les méthodes interne qui commence par __
@@ -54,13 +54,13 @@ class DTOManager
             $docComment = $property->getDocComment();
 
             $annotations = $this->__parseAnnotations($docComment,$matches);
-            $this->pilote[$name]["field"] = $name;
-            $this->pilote[$name]["origineValue"] = $value;
-            $this->pilote[$name]["value"] = $value;
+            $currentPilote = new DTOPilote($name, $value);
+            $this->pilote[$name] = $currentPilote;
+
             foreach ($annotations as $key => $value) {
                 $annotations[$key] = null;
             }
-            $this->pilote[$name]["methodes"] = $annotations;
+            $this->pilote[$name]->methodes = $annotations;
 
             $lignesDocComment = explode("\n", $docComment);
             foreach ($lignesDocComment as $ligne) {
@@ -71,8 +71,9 @@ class DTOManager
                     $attribute = str_replace(['@', '*', ' '], '', $attribute);
                     $contrainte = str_replace(' ', '', $contrainte);
 
-                    if(array_key_exists($attribute, $this->pilote[$name]["methodes"])) {                           
-                        $this->pilote[$name]["methodes"][$attribute] = $this->__sanityzeDecorator($contrainte);
+                    if(array_key_exists($attribute, $this->pilote[$name]->getMethodes())) {                           
+
+                        $this->pilote[$name]->addMethode($attribute, $this->__sanityzeDecorator($contrainte));
                     }
 
                 } 
@@ -81,14 +82,10 @@ class DTOManager
             EntityValidator::findField($this->entity->getFields(),$name);
         }
 
-        echo "Pilote : ";
-        echo '<pre>';
-        print_r($this->pilote);
-        echo '</pre>';
 
         //un fois que le pilotes est prêt, on appllique chaque fonction pour chaque propriété
         foreach ($this->pilote as $property => $element) {
-            foreach ($element["methodes"] as $method => $value) {
+            foreach ($element->getMethodes() as $method => $value) {
                 if($value !== null){
                     $this->$method($element, $value);
                 } else $this->$method($element);
@@ -177,82 +174,220 @@ class DTOManager
 
     private function __setHistoryMethod($attribute, $methodName = null, $value = null) {
         $this->dataToTransfer[$methodName] = $value;
-        $this->pilote[$attribute]["history"] = [
-            "method" => $methodName,
-            "value" => $value]
-        ;
+        $this->pilote[$attribute]->addHistory($methodName, $value);
     }
 
     private function __getHistoryMethod($attribute) {
-        return $this->pilote[$attribute]["history"];
+        return $this->pilote[$attribute]->getHistorys();
     }
 
 
+    /**
+     * --- 
+     * ### DECORATEUR
+     * - **@isUnique** : Défini une valeur comme étant unique
+     * --- 
+     * ### Comportement
+     * Oblige l'usage d'une valeur unique
+     */
     private function isUnique($piloteProperty) {
-        $response = $this->entity->isUniqueField($piloteProperty["field"], $piloteProperty["value"]);
-        if($response === false) throw new \Exception("La valeur de ".$piloteProperty["field"]." n'est pas unique"); 
+        $response = $this->entity->isUniqueField($piloteProperty->getFieldName(),$piloteProperty->getValue());
+        if($response === false) throw new \Exception("La valeur de ".$piloteProperty->getFieldName()." n'est pas unique"); 
     }
 
+    /**
+     * ---
+     * ### DECORATEUR
+     * - **@isMail** : Défini une valeur comme étant un mail
+     * ---
+     * ### Comportement
+     * Oblige l'usage d'un mail
+     */
     private function isMail($piloteProperty) {
         // Vérifier que la valeur est un mail
-        $response = filter_var($piloteProperty["value"], FILTER_VALIDATE_EMAIL);
-        if($response === false) throw new \Exception("La valeur de ".$piloteProperty["field"]." n'est pas un mail");
+        $response = filter_var($piloteProperty->getValue(), FILTER_VALIDATE_EMAIL);
+        if($response === false) throw new \Exception("La valeur de ".$piloteProperty->getFieldName()." n'est pas un mail");
     }
 
+    /**
+     * ---
+     * ### DECORATEUR
+     * - **@isPassword** : Défini une valeur comme étant un mot de passe
+     * ---
+     * ### Comportement
+     * Oblige l'usage d'un password selon les recommandation de la CNIL : 
+     * - 8 caractères minimum
+     * - 1 majuscule
+     * - 1 minuscule
+     * - 1 chiffre
+     * - 1 caractère spécial
+     * ### Transformation
+     * La valeur est hashé en sha256
+     */
     private function isPassword($piloteProperty) {
         // Vérifier que la valeur est un mot de passe
-        $response = preg_match('/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}/', $piloteProperty["value"]);
-        $this->__setHistoryMethod($piloteProperty["field"], "isPassword", $piloteProperty["value"]);
-        if($response === false) throw new \Exception("La valeur de ".$piloteProperty["field"]." est trop faible");
+        $response = preg_match('/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}/', $piloteProperty->getValue());
+        $this->__setHistoryMethod($piloteProperty->getFieldName(), "isPassword", $piloteProperty->getValue());
+        if($response === false) throw new \Exception("La valeur de ".$piloteProperty->getFieldName()." est trop faible");
+        //dans ce cas on hash le password directement
+        $piloteProperty->setValue(hash('sha256',$piloteProperty->getValue()));
     }
 
+    /**
+     * ---
+     * ### DECORATEUR
+     * - **@minLength** : Défini une longueur minimale pour la valeur de la propriété
+     * ---
+     * ### Utilisation
+     * ```php
+     * <?php
+     * /**
+     * * @minLength : 8
+     * * /
+     * public string $password;
+     * ```
+     */
     private function minLength($piloteProperty, $contrainte) {
-        $result = strlen($piloteProperty["value"]) >= $contrainte;
-        if($result === false) throw new \Exception("La valeur de ".$piloteProperty["field"]." est inférieur à la longueur minimale de ".$contrainte);
+        $result = strlen($piloteProperty->getValue()) >= $contrainte;
+        $this->__setHistoryMethod($piloteProperty->getFieldName(), "minLength", $contrainte);
+        if($result === false) throw new \Exception("La valeur de ".$piloteProperty->getFieldName()." est inférieur à la longueur minimale de ".$contrainte);
     }
 
+    /**
+     * ---
+     * ### DECORATEUR
+     * - **@maxLength** : Défini une longueur maximale pour la valeur de la propriété
+     * ---
+     * ### Utilisation
+     * ```php
+     * /**
+     * * @maxLength : 255
+     * * /
+     * public string $name;
+     * ```
+     * ---
+     */
     private function maxLength($piloteProperty, $contrainte) {
-        $result = strlen($piloteProperty["value"]) <= $contrainte;
-        if($result === false) throw new \Exception("La valeur de ".$piloteProperty["field"]." est supérieur à la longueur maximale de ".$contrainte);
+        $result = strlen($piloteProperty->getValue()) <= $contrainte;
+        $this->__setHistoryMethod($piloteProperty->getFieldName(), "maxLength", $contrainte);
+        if($result === false) throw new \Exception("La valeur de ".$piloteProperty->getFieldName()." est supérieur à la longueur maximale de ".$contrainte);
     }
 
+    /**
+     * ---
+     * ### DECORATEUR
+     * - **@defineRegex** : Défini une regex pour la valeur de la propriété
+     * ---
+     * ### Utilisation
+     * ```php
+     * /**
+     * * @defineRegex : /[^a-zA-Z0-9]/
+     * * /
+     * public string $name;
+     * ```
+     * ---
+     */
     private function defineRegex($piloteProperty, $contraintes) {
-    $contraintes = trim($contraintes);
-    if ($contraintes[0] !== '/' || substr($contraintes, -1) !== '/') {
-        throw new \Exception("Syntax Error : Decorator  defineRegex dans le champs".$piloteProperty["field"]." ne correspond pas a une regex");
-    }  
+        $contraintes = trim($contraintes);
+        if ($contraintes[0] !== '/' || substr($contraintes, -1) !== '/') {
+            throw new \Exception("Syntax Error : Decorator  defineRegex dans le champs".$piloteProperty->getFieldName()." ne correspond pas a une regex");
+        }  
 
-    $result = preg_match($contraintes, $piloteProperty["value"]);
+        $result = preg_match($contraintes, $piloteProperty->getValue());
 
-    if ($result === 0) {
-        throw new \Exception("La valeur de la propriété".$piloteProperty["field"]." ne correspond pas à l'expression régulière attendue");
+        $this->__setHistoryMethod($piloteProperty->getFieldName(), "defineRegex", $contraintes);
+        if ($result === 0) {
+            throw new \Exception("La valeur de la propriété".$piloteProperty->getFieldName()." ne correspond pas à l'expression régulière attendue");
+        }
     }
+
+    /**
+     * ---
+     * ### DECORATEUR
+     *  - **@updatedTime** : Met a jour automatiquement la valeur de la propriété en DateTime
+     * ---
+     */
+    private function updatedTime(DTOPilote $piloteProperty) {
+        $dateNow = new \DateTime();
+        $piloteProperty->setValue($dateNow->format('Y-m-d H:i:s'));
+        $this->__setHistoryMethod($piloteProperty->getFieldName(), "updatedTime", $dateNow->format('Y-m-d H:i:s'));            
     }
 
+    /**
+     * ---
+     * ### DECORATEUR
+     *  - **@createdTime** : Met a jour automatiquement la valeur de la propriété en DateTime
+     * ---
+     */
+    private function createdTime($piloteProperty) {
+        if($piloteProperty->getValue() === null) {
+            $dateNow = new \DateTime();
+            $piloteProperty->setValue($dateNow->format('Y-m-d H:i:s'));
+            $this->__setHistoryMethod($piloteProperty->getFieldName(), "createdTime", $dateNow->format('Y-m-d H:i:s'));
+        }
+    }
+
+    /**
+     * ---
+     * ### DECORATEUR
+     *  - **@type** : Défini le type de la valeur de la propriété
+     * ---
+     */
     private function type($piloteProperty, $contrainte) {
-        $typeOfValue = gettype($piloteProperty["value"]);
+        $typeOfValue = gettype($piloteProperty->getValue());
         //on verifie cependant si la piloteProperty n'a pas une fonction default qui permet de définir une valeur par défaut
         if(!array_key_exists("default", $piloteProperty["methodes"]) && $typeOfValue != $contrainte){
-            throw new \Exception("Le champ " . $piloteProperty["field"] . " doit être de type " . $contrainte.". Type reçu : " . $typeOfValue);
+            throw new \Exception("Le champ " . $piloteProperty->getFieldName() . " doit être de type " . $contrainte.". Type reçu : " . $typeOfValue);
         }
     }
 
+    /**
+     * ---
+     * ### DECORATEUR
+     *  - **@default** : Défini une valeur par défaut pour la propriété
+     * ---
+     * ### Utilisation
+     * ```php
+     * /**
+     * * @default : 18
+     * * /
+     * public int $age;
+     */
     private function default($piloteProperty, $contrainte) {
-        if($piloteProperty["value"] === null) {
-            $piloteProperty["value"] = $contrainte;
-            $this ->__setHistoryMethod($piloteProperty["field"], "default", $contrainte);
-            $this->dataToTransfer[$piloteProperty["field"]] = $contrainte;
+        if($piloteProperty->getValue() === null) {
+            $piloteProperty->setValue($contrainte);
+            $this ->__setHistoryMethod($piloteProperty->getFieldName(), "default", $contrainte);
+            $this->dataToTransfer[$piloteProperty->getFieldName()] = $contrainte;
         }
     }
 
-    private function tableau($piloteProperty) {
-        // Vérifier que la valeur est dans un tableau
-        echo "Rune methode : tableau";
+    /**
+     * ---
+     * ### DECORATEUR
+     * - **@primaryKey** : Défini la propriété comme étant la clé primaire de l'entité
+     * ---
+     */
+    private function primaryKey($piloteProperty) {
+        $this->entity->setPrimaryKey($piloteProperty->getFieldName());
     }
 
-    private function tableauKeyValue($piloteProperty) {
-        // Vérifier que la valeur est dans un tableau avec des clés
-        echo "Rune methode : tableauKeyValue";
+    /**
+     * ---
+     * ### DECORATEUR
+     * - **@foreignKey** : Défini la propriété comme étant une clé étrangère de l'entité
+     * ---
+     * ### Utilisation
+     * ```php
+     * /**
+     * * @foreignKey : User
+     * * /
+     * public int $user_id;
+     */
+    private function foreignKey($piloteProperty, $contrainte) {
+        $this->entity->setForeignKey($piloteProperty->getFieldName(), $contrainte);
+        //on s'assure alors que la valeur d'entrée est bien de type DTOEntity
+        if(!is_a($piloteProperty->getValue(), "App\Core\DataTransferObjectManager\DTOEntity")) {
+            throw new \Exception("La valeur de ".$piloteProperty->getFieldName()." n'est pas une instance de DTOEntity");
+        }
     }
-
 }

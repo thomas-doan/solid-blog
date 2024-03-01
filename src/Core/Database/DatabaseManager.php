@@ -2,7 +2,7 @@
 
 namespace App\Core\Database;
 
-use App\Core\QueryBuilder\QueryDirector;
+use App\Core\QueryBuilder\QueryBuilderSQL;
 
 /**
  * Cette classe permet de récupérer des informations sur la structure de la base de données
@@ -13,7 +13,7 @@ class DatabaseManager implements DatabaseManagerInterface {
 
     public static function getInfoTable($table)
     {
-        $query = new QueryDirector();
+        $query = new QueryBuilderSQL();
 
         $attributes = [
             "TABLE_SCHEMA" => $_ENV['DATABASE_DB'],
@@ -31,7 +31,7 @@ class DatabaseManager implements DatabaseManagerInterface {
 
     public static function getRelationsTable($table)
     {
-        $query = new QueryDirector();
+        $query = new QueryBuilderSQL();
         $attributes = [
             "TABLE_NAME" => $table,
             "CONSTRAINT_SCHEMA" => $_ENV['DATABASE_DB']
@@ -52,7 +52,7 @@ class DatabaseManager implements DatabaseManagerInterface {
 
     public static function isUnique($table, $field, $value)
     {
-        $query = new QueryDirector();
+        $query = new QueryBuilderSQL();
         $query->setQuery('SELECT NOT EXISTS (
             SELECT 1
             FROM ' . $table . '

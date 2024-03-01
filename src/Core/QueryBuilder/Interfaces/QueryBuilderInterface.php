@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\QueryBuilder;
+namespace App\Core\QueryBuilder\Interfaces;
 
-interface QueryDirectorInterface
+interface QueryBuilderInterface
 {
     /**
     * Permet de selectionner des éléments dans la base de données
