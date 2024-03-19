@@ -109,3 +109,8 @@ Ce pendant en l'état actuel sa responsabilité comme tel auraigt nécessité un
 
 Dans une approche de scalabilité le builder est pensée pour pouvoir intégrée un factory.
 
+## Facade pattern
+Dans une approche pour cacher la complexité des methodes, la facade nous permet de simplifier l'usage.
+
+## Strategy pattern
+Dans une approche pour permettre une interchangabilité des algorithmes, le strategy pattern permet de définir une famille d'algorithme, les encapsuler et les rendre interchangable.
