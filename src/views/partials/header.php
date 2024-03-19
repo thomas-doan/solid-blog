@@ -2,6 +2,7 @@
 
 use App\Class\Database;
 use App\Controller\UserController;
+use App\Core\Accessors\AccessorGenerator;
 use App\Core\Database\DatabaseManager;
 use App\Core\DataTransferObjectManager\DTOInterface;
 use App\Core\DataTransferObjectManager\DTOManager;
@@ -10,6 +11,47 @@ use App\Router\Router;
 use App\DevTools\EchoDebug;
 use App\DTO\UserDTO;
 
+class publicUserDTO implements DTOInterface
+{   
+    use AccessorGenerator;
+    /**
+     * @primaryKey
+     */
+    public int $id;
+    public string $firstname;
+    public string $lastname;
+
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function setFirstname($firstname)
+    {
+        $this->firstname = $firstname;
+    }
+
+    public function getFirstname()
+    {
+        return $this->firstname;
+    }
+
+    public function setLastname($lastname)
+    {
+        $this->lastname = $lastname;
+    }
+
+    public function getLastname()
+    {
+        return $this->lastname;
+    }
+
+}
 class updatePostDTO implements DTOInterface
 {
     /**
@@ -21,22 +63,60 @@ class updatePostDTO implements DTOInterface
 
     public string $content = "Voluptas hic dolorem quae iure sit.";
 
-    public DateTime $created_at = "2021-01-01 00:00:00";
+    public $created_at = "2021-01-01 00:00:00";
 
     /**
      * @updatedTime
      */
-    public DateTime $updated_at;
+    public $updated_at;
 
     /**
      * @foreignKey : user 
      */
-    public int $user_id = new UserDTO();
+    public $user_id;
+
+    public function __construct()
+    {
+        $this->user_id = new publicUserDTO();
+        $this->user_id->setId(4);
+    }
+
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    public function setContent($content)
+    {
+        $this->content = $content;
+    }
+
+    public function getContent()
+    {
+        return $this->content;
+    }
+
 }
 
 $insertUser = new updatePostDTO();
+$insertUser->setTitle("test");
 $entityManager = new EntityManager('post');
-$entityManager->update($insertUser);
+$entityManager->modify($insertUser);
 //$entityManager->find(["user_id" => 1,"*","populate" => ['post',["id", "content"]]]);
 Echodebug::xDebug($entityManager->getResult());
 

@@ -4,11 +4,10 @@ namespace App\Core\DataTransferObjectManager;
 
 use App\Class\Database;
 use App\Core\Database\Database as DatabaseDatabase;
+use App\Core\Database\DatabaseManager;
 use App\Core\EntityManager\EntityManager;
 use App\Core\EntityManager\EntityValidator;
 use App\DevTools\EchoDebug;
-
-use function PHPSTORM_META\map;
 
 
 // Dependency Inversion Principle
@@ -18,6 +17,11 @@ use function PHPSTORM_META\map;
  * 1. Elle verifie que l'object reçus dans el constructu est bien une instance de DTOInterface
  * 2. Elle parcours alors ces propriétés et les décorateurs associés
  * 3. Elle traduit se décorateur par la méthode associées
+ * 
+ * ### Approche est paradygme
+ * **Programmation Orientée Aspect (AOP)** : Les décorateurs permettent de séparer les préoccupations (concerns) dans le code en introduisant des aspects transversaux tels que la journalisation, la gestion des erreurs, la validation des données, etc. Cela permet de maintenir un code plus modulaire et plus propre.
+ * 
+ * **Modèle de Conception Décorateur** : Il s'agit d'un design pattern structurel qui permet d'ajouter des fonctionnalités à des objets de manière dynamique.
  */
 class DTOManager
 {
@@ -384,10 +388,23 @@ class DTOManager
      * public int $user_id;
      */
     private function foreignKey($piloteProperty, $contrainte) {
+        //EchoDebug::xDebug($piloteProperty->getFieldName(), $contrainte);
         $this->entity->setForeignKey($piloteProperty->getFieldName(), $contrainte);
+
         //on s'assure alors que la valeur d'entrée est bien de type DTOEntity
-        if(!is_a($piloteProperty->getValue(), "App\Core\DataTransferObjectManager\DTOEntity")) {
+        if(!is_a($piloteProperty->getValue(), "App\Core\DataTransferObjectManager\DTOInterface")) {
             throw new \Exception("La valeur de ".$piloteProperty->getFieldName()." n'est pas une instance de DTOEntity");
         }
+        //si la valeur est bien une instance de DTOEntity alors on process le DTOEntity
+        
+
+        echo $contrainte;
+        if($piloteProperty->getValue() !== null) {
+
+            $this->entity->setForeignKeyValue($piloteProperty->getFieldName(), $piloteProperty->getValue()->getId());
+           
+        }
+
+
     }
 }

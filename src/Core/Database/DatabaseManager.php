@@ -3,6 +3,7 @@
 namespace App\Core\Database;
 
 use App\Core\QueryBuilder\QueryBuilderSQL;
+use App\DevTools\EchoDebug;
 
 /**
  * Cette classe permet de récupérer des informations sur la structure de la base de données
@@ -47,7 +48,9 @@ class DatabaseManager implements DatabaseManagerInterface {
 
         $query->where($attributes);
 
-        return $query->sendQuery();
+        $return = $query->sendQuery();
+        return $return;
+        
     }
 
     public static function isUnique($table, $field, $value)

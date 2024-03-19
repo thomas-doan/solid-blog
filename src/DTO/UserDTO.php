@@ -2,7 +2,9 @@
 
 namespace App\DTO;
 
-class UserDTO
+use App\Core\DataTransferObjectManager\DTOInterface;
+
+class UserDTO implements DTOInterface
 {
     private ?int $id = null;
     private ?string $email = null;

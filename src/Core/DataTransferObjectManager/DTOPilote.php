@@ -10,7 +10,7 @@ class DTOPilote {
     public $origneValue;
     public $value;
     public array $methodes;
-    public DTOPiloteMemento $history;
+    public $history;
 
     public function __construct(string $fieldName, $value)
     {
@@ -68,11 +68,5 @@ class DTOPilote {
     {
         return $this->history;
     }
-
-
-
-
-
-
 
 }

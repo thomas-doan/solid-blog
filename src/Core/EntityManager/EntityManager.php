@@ -16,8 +16,11 @@ use App\Core\QueryBuilder\Interfaces\QueryBuilderInterface;
 use App\Core\QueryBuilder\QueryBuilderSQL;
 use App\DevTools\EchoDebug;
 
-// Open-Closed Principle
-// Liskov Substitution Principle - 3ème partie
+/**
+ * ## Domain Language Model (DLM) celon un approche Repository
+ * Le Domain Language Model (DLM) est une solution inspirée de la librairie queryString, bien qu'elle soit indépendante de celle-ci. Son objectif est de permettre une structuration harmonieuse des requêtes à envoyer dans un environnement PHP. Bien qu'elle ne vise pas à être aussi exhaustive, elle offre une manière rapide et efficace de structurer une variable PHP en un élément simple pouvant être converti en requête complexe.
+ * Cette approche permet a notre EntityManager de jouer le rôle de façade pour les requêtes SQL. Il permet de structurer les requêtes SQL de manière à ce qu'elles soient plus facilement compréhensibles et maintenables. Cette structure Orientée Object permet de faciliter la lecture et la compréhension des requêtes SQL.
+ */
 class EntityManager extends QueryBuilderSQL 
 {
     use AccessorGenerator;
@@ -37,10 +40,10 @@ class EntityManager extends QueryBuilderSQL
         $this->generateAccessor();
         $this->primaryTable = $primaryTable;
         parent::__construct();
-
         foreach (DatabaseManager::getInfoTable($primaryTable) as $field) {
             $this->fields[] = new EntityAttribute($field);
         }
+
 
         $this->relations = DatabaseManager::getRelationsTable($primaryTable);
 
@@ -133,7 +136,7 @@ class EntityManager extends QueryBuilderSQL
      * ### Utilisation du Populate
      * @exemple find(["title" => "test", 'populate' => ['comments', ['content' => 'test']]]) | Succes ! Renvoie tout les posts avec le titre test et les commentaires avec le contenu test
      * @exemple find(["user_id" => 1,"\*","populate" => ['post',["id", "content"]]]) | Succes ! Renvoie tout les commentaires de l'utilisateur 1 avec les attributs id et content du post
-     * @exempe find(["user_id" => 1,"\*","populate" => ['\*"',["\*""]) | Succes ! Renvoie tout les commentaires de l'utilisateur 1 avec tous les attributs des tables de relation affectées
+     * @exempe find(["user_id" => 1,"\*","populate" => ['*',["*"]) | Succes ! Renvoie tout les commentaires de l'utilisateur 1 avec tous les attributs des tables de relation affectées
      * @exemple find(["user_id" => 1,"\*","populate" => ['\*"',["id", "content"]]]) | Peut être dangereux si content n'est pas présents dans la table de relation
      */
     public function find(array $params = null): void
@@ -221,19 +224,21 @@ class EntityManager extends QueryBuilderSQL
 
     /**
      * Permet de mettre à jour un élément dans la base de données
-     * @param $reference int | array
-     * @param $params array
+     * @param DTOInterface $DTO
      * @exemple update(1, ["title" => "test", "content" => "test"]) | Succes ! Met à jour le post avec l'id 1 avec le titre test et le contenu test
      * @exemple update(["title" => "test"], ["title" => "OtherTexte", "content" => "test"]) | Succes ! Met à jour le post avec le titre test avec le titre OtherTexte et le contenu test
      */
-    public function modify(int $id, array $params): void
+    public function modify(DTOInterface $DTO): void
     {
-        $this->update($this->primaryTable, $params);
-        if(is_int($id)){
-            $this->where([$this->primaryKey => $id]);
+        $BuildQuery = new DTODecorator($this);
+        $BuildQuery->formatForUpdate($DTO);
+
+        $this->update($BuildQuery->table, $BuildQuery->params);
+        if(is_int($BuildQuery->params)){
+            $this->where([$this->primaryKey => $BuildQuery->params]);
         } else {
-            EntityValidator::checkFields($this->fields, $id);
-            $this->where($id);
+            EntityValidator::checkFields($this->fields, $BuildQuery->params);
+            $this->where($BuildQuery->params);
         }
         $this->saveQuery('modify', $this->getQuery(), $this->getClose());
         $this->sendQuery();
