@@ -10,7 +10,7 @@ services:
       MYSQL_USER: $USER_DB
       MYSQL_PASSWORD: $PASSWORD_DB
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - data:/var/lib/mysql
 
@@ -25,18 +25,6 @@ services:
     depends_on:
       - mariadb
     working_dir: /var/www/html/
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
-    environment:
-      PMA_HOST: mariadb
-      PMA_USER: $USER_DB
-      PMA_PASSWORD: $PASSWORD_DB
-    ports:
-      - "8080:80"
-    depends_on:
-      - mariadb
 
   # environment:
   #   - APACHE_DOCUMENT_ROOT=/var/www/html/stupid-blog-main
