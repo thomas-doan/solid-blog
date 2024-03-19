@@ -1,19 +1,24 @@
 <?php
 
 namespace App\Controller;
-use App\Class\Comment;
-use App\Class\Post;
-use App\Controller;
+
 use App\Controller\AbstractController;
+use App\Controller\Facade\HomeFacade;
+
 
 class HomeController extends AbstractController
 {
+    private HomeFacade $homeFacade;
+
+    public function __construct(HomeFacade $homeFacade)
+    {
+        $this->homeFacade = $homeFacade;
+    }
+
     public function paginatedPosts($page)
     {
-        $post = new Post();
-        $posts = $post->findAllPaginated($page);
-        $pages = count($post->findAll()) / 10;
-        $this->render('posts', ['posts' => $posts, 'pages' => $pages]);
+        $data = $this->homeFacade->paginatedPosts($page);
+        $this->render('posts', $data);
     }
 
     public function viewPost($id, $error = null)
@@ -23,8 +28,7 @@ class HomeController extends AbstractController
 
             return;
         }
-        $post = new Post();
-        $post = $post->findOneById((int)$id);
+        $post = $this->homeFacade->viewPost((int)$id);
         $this->render('post', ['post' => $post, 'error' => $error]);
     }
 
@@ -46,19 +50,10 @@ class HomeController extends AbstractController
             return;
         }
 
-        $post_id = (int)$post_id;
-
-        $post = new Post();
-        $post = $post->findOneById($post_id);
-
-        $comment = new Comment();
-        $comment->setContent($content);
+        $comment = $this->homeFacade->createComment($content, (int)$post_id);
         $comment->setUser(self::getUser());
-        $comment->setPost($post);
-        $comment->setCreatedAt(new \DateTime());
         $comment->save();
 
-        $this->redirect('post', ['id' => $post->getId()]);
+        $this->redirect('post', ['id' => $post_id]);
     }
-
 }
