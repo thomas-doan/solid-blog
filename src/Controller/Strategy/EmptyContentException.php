@@ -2,7 +2,11 @@
 
 namespace App\Controller\Strategy;
 
-class EmptyContentExceptionStrategy implements ExceptionStrategy
+
+
+use Exception;
+
+class EmptyContentException extends Exception
 {
     public function handle(\Exception $exception)
     {

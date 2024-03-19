@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Controller\Strategy;
+use Exception;
 
-class NotLoggedInExceptionStrategy implements ExceptionStrategy
+class NumericIdException extends Exception
 {
     public function handle(\Exception $exception)
     {

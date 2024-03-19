@@ -8,9 +8,9 @@ class ExceptionHandler
     public function __construct()
     {
         $this->strategies = [
-            'NumericIdException' => new NumericIdExceptionStrategy(),
-            'EmptyContentException' => new EmptyContentExceptionStrategy(),
-            'NotLoggedInException' => new NotLoggedInExceptionStrategy(),
+            'NumericIdException' => new NumericIdException(),
+            'EmptyContentException' => new EmptyContentException(),
+            'NotLoggedInException' => new NotLoggedInException(),
         ];
     }
 

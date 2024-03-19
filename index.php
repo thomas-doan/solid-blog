@@ -4,6 +4,7 @@ use App\Container\SimpleContainer;
 use App\Controller\AdminController;
 use App\Controller\Facade\HomeFacade;
 use App\Controller\HomeController;
+use App\Controller\Strategy\ExceptionHandler;
 use App\Controller\UserController;
 use App\Exception\ValidationException;
 use App\Factory\UserDTOFactory;
@@ -35,7 +36,9 @@ $container->set(UserService::class, function($container) {
 
 $router->get('/', function () {
     $homeFacade = new HomeFacade();
-    $controller = new HomeController($homeFacade);
+    $exceptionHandler = new ExceptionHandler();
+
+    $controller = new HomeController($homeFacade, $exceptionHandler );
     $controller->render('index');
 }, "home");
 
@@ -86,20 +89,26 @@ $router->get('/profile', function () use($container) {
 
 $router->get('/posts/:page', function ($page = 1) {
     $homeFacade = new HomeFacade();
-    $controller = new HomeController($homeFacade);
+    $exceptionHandler = new ExceptionHandler();
+
+    $controller = new HomeController($homeFacade, $exceptionHandler );
     $controller->paginatedPosts($page);
 }, "posts")->with('page', '[0-9]+');
 
 $router->get('/post/:id', function ($id) {
     $homeFacade = new HomeFacade();
-    $controller = new HomeController($homeFacade);
+    $exceptionHandler = new ExceptionHandler();
+
+    $controller = new HomeController($homeFacade, $exceptionHandler );
     $controller->viewPost($id);
 }, "post")->with('id', '[0-9]+');
 
 $router->post('/comments/:post_id', function ($post_id) {
     try {
         $homeFacade = new HomeFacade();
-        $controller = new HomeController($homeFacade);
+        $exceptionHandler = new ExceptionHandler();
+
+        $controller = new HomeController($homeFacade, $exceptionHandler );
         $controller->createComment($_POST['content'], $post_id);
     } catch (\Exception $e) {
         $controller->viewPost($post_id, ['error' => $e->getMessage()]);
